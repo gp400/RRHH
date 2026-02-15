@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from db import database
 from exceptions.global_exception_handler import global_exception_handler
-from routers import competence_router, language_router, training_router, position_router, department_router
+from routers import competence_router, language_router, training_router, position_router, department_router, \
+    worker_router
 
 app = FastAPI()
 
@@ -28,3 +29,4 @@ app.include_router(language_router.router, prefix="/language", tags=["language"]
 app.include_router(training_router.router, prefix="/training", tags=["training"])
 app.include_router(position_router.router, prefix="/position", tags=["position"])
 app.include_router(department_router.router, prefix="/department", tags=["department"])
+app.include_router(worker_router.router, prefix="/worker", tags=["worker"])

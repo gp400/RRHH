@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, Boolean, String
+from sqlalchemy.orm import relationship
 
 from db.database import Base
 
@@ -11,3 +12,5 @@ class Position(Base):
     min_wage = Column(Integer)
     max_wage = Column(Integer)
     state = Column(Boolean)
+
+    workers = relationship("Worker", back_populates="position")

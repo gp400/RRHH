@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, Date
+from sqlalchemy.orm import relationship
 
 from db.database import Base
 
@@ -12,3 +13,5 @@ class Training(Base):
     end_date = Column(Date)
     institution = Column(String)
     state = Column(Boolean)
+
+    workers = relationship("WorkerTraining", back_populates="training")

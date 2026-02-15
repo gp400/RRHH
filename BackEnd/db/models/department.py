@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy.orm import relationship
 
 from db.database import Base
 
@@ -9,3 +10,5 @@ class Department(Base):
     name = Column(String)
     description = Column(String)
     state = Column(Boolean)
+
+    workers = relationship("Worker", back_populates="department")
