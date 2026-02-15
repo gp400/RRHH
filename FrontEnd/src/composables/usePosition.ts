@@ -1,6 +1,6 @@
 import { Position } from '@/dto/Position';
 import apiClient from '@/utils/apiClient';
-import { parsePositionRiskLevel } from '@/utils/parsepositionRiskLevel';
+import { parsePositionRiskLevel } from '@/utils/parsePositionRiskLevel';
 import { salaryFormatter } from '@/utils/salaryFormatter';
 
 const route: String = "position";

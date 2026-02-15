@@ -1,4 +1,4 @@
-import type { Department } from '@/dto/department';
+import type { Department } from '@/dto/Department';
 import apiClient from '@/utils/apiClient';
 
 const route: String = "department";

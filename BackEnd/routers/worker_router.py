@@ -16,8 +16,9 @@ from schema.worker_training_schema import WorkerTrainingSchema
 
 router = APIRouter()
 
-not_found_message_candidate = "Candidato no encontrado."
 not_found_message_employee = "Empleado no encontrado."
+not_found_message_candidate = "Candidato no encontrado."
+recommended_message = "El Empleado no se puede eliminar porque posee candidatos relacionados."
 
 def get_db():
     db = SessionLocal()
@@ -28,7 +29,7 @@ def get_db():
 
 @router.get("/get_all/{workerType}")
 def get_all(workerType: int, db: Session = Depends(get_db)):
-    workers: list[type[Worker]] = db.query(Worker).filter(Worker.state and Worker.type == workerType).all()
+    workers: list[type[Worker]] = db.query(Worker).filter(Worker.state, Worker.type == workerType).all()
     return list(map(lambda worker: WorkerSchema(
         id=worker.id,
         identification=worker.identification,
@@ -175,7 +176,10 @@ def update(worker: WorkerSchema, db: Session = Depends(get_db)):
     worker_db: type[Worker] = db.query(Worker).filter(Worker.id == worker.id and Worker.state).first()
 
     if worker_db is None:
-        raise HTTPException(status_code=404, detail= not_found_message_candidate if worker.type == WorkerType.candidate else not_found_message_employee)
+        raise HTTPException(status_code=404, detail=not_found_message_candidate if worker.type == WorkerType.candidate else not_found_message_employee)
+
+    if any(w.state == True for w in worker_db.workers) and worker.state == False:
+        raise  HTTPException(status_code=400, detail=recommended_message)
 
     worker_db.identification = worker.identification
     worker_db.name = worker.name
@@ -191,7 +195,7 @@ def update(worker: WorkerSchema, db: Session = Depends(get_db)):
     worker_db.experiences = list(map(lambda e: Experience(company=e.company, position=e.position, description=e.description,
                                                 initial_date=e.initial_date, end_date=e.end_date, wage=e.wage,
                                                 worker_id=e.worker_id, state=True), worker.experiences))
-    worker_db.state = True
+    worker_db.state = worker.state
 
     db.commit()
     db.refresh(worker_db)

@@ -1,4 +1,4 @@
-import type { Department } from "./department"
+import type { Department } from "./Department"
 import type { Experience } from "./Experience"
 import type { Position } from "./Position"
 import type { WorkerCompetence } from "./WorkerCompetence"

@@ -30,37 +30,46 @@
       <v-row>
         <v-col cols="12" md="6">
             <v-text-field
-              v-model="formData.name"
-              label="Nombre"
+              v-model="formData.institution"
+              label="Institucion"
               :rules="requiredRule"
             />
         </v-col>
         <v-col cols="12" md="6">
           <v-select
-            v-model="formData.risk_level"
-            :items="riskLevelOptions"
+            v-model="formData.level"
+            :items="workerTypeOptions"
             item-title="Name"
             item-value="Id"
-            label="Nivel de Riesgo"
+            label="Nivel"
             :rules="requiredRule"
           />
         </v-col>
           <v-col cols="12" md="6">
             <v-text-field
-              v-model="formData.min_wage"
-              type="number"
-              label="Nivel Mínimo Salario"
-              min="1"
-              :rules="[ ...requiredRule, ...greaterOrEqualThanRule(1), ...maxValueRule(formData.max_wage) ]"
-            />
+              v-model="formData.initial_date"
+              type="date"
+              label="Fecha Desde"
+              :max="formData.end_date"
+              :rules="requiredRule"
+              clearable
+          />
           </v-col>
           <v-col cols="12" md="6">
             <v-text-field
-              v-model="formData.max_wage"
-              type="number"
-              label="Nivel Máximo Salario"
-              min="1"
-              :rules="[ ...requiredRule, ...greaterOrEqualThanRule(1),...minValueRule(formData.min_wage) ]"
+              v-model="formData.end_date"
+              type="date"
+              label="Fecha Hasta"
+              :min="formData.initial_date"
+              :rules="requiredRule"
+              clearable
+            />
+          </v-col>
+          <v-col cols="12">
+            <v-textarea
+              v-model="formData.description"
+              label="Descripción"
+              :rules="requiredRule"
             />
           </v-col>
       </v-row>
@@ -70,47 +79,49 @@
 
 <script setup lang="ts">
     import CrudComponent from '@/components/CrudComponent.vue';
-    import { usePosition } from '@/composables/usePosition';
-    import { Position } from '@/dto/Position';
-    import { requiredRule, greaterOrEqualThanRule, maxValueRule, minValueRule } from '@/utils/Validations';
+    import { useWorker } from '@/composables/useWorker';
+    import { Worker } from '@/dto/Worker';
+    import { WorkerType } from '@/enum/workerType';
+import { parseWorkerType } from '@/utils/parseWorkerType';
+    import { requiredRule } from '@/utils/Validations';
     import { onMounted, ref } from 'vue';
     import { DataTableHeader } from 'vuetify';
     import { VForm } from 'vuetify/components';
-    import { PositionRiskLevel } from '../enum/positionRiskLevel';
-    import { parsePositionRiskLevel } from '@/utils/parsePositionRiskLevel';
 
     const { 
         getAll,
         getById,
         create,
         update
-    } = usePosition()
+    } = useWorker()
 
-    const title = 'Puestos';
-    const btnText = 'Crear Puesto';
-    const itemsPerPageText = 'Puestos por pagina'
+    const title = 'Capacitaciones';
+    const btnText = 'Crear Capacitacion';
+    const itemsPerPageText = 'Capacitaciones por pagina'
 
     const formRef = ref<InstanceType<typeof VForm> | null>(null);
-    const formData = ref(new Position());
+    const formData = ref(new Worker());
 
-    const items = ref<Position[]>([]);
+    const workerType = ref<WorkerType>(WorkerType.candidate);
+    const items = ref<Worker[]>([]);
     const showSnackbar = ref<boolean>(false);
     const snackbarText = ref<string>('');
-    const riskLevelOptions = ref([
-      { Id: PositionRiskLevel.High, Name: parsePositionRiskLevel(PositionRiskLevel.High) },
-      { Id: PositionRiskLevel.Medium, Name: parsePositionRiskLevel(PositionRiskLevel.Medium) },
-      { Id: PositionRiskLevel.Low, Name: parsePositionRiskLevel(PositionRiskLevel.Low) },
+    const workerTypeOptions = ref([
+      { Id: WorkerType.candidate, Name: parseWorkerType(WorkerType.candidate) },
+      { Id: WorkerType.employee, Name: parseWorkerType(WorkerType.employee) },
     ]);
 
     onMounted(async() => {
-        items.value = await getAll();
+        items.value = await getAll(workerType.value);
     })
 
     const headers: DataTableHeader[] = [
+        { title: 'Cédula', key: "identification" },
         { title: 'Nombre', key: "name" },
-        { title: 'Nivel de Riesgo', key: "risk_level_text" },
-        { title: 'Nivel Mínimo Salario', key: "min_wage_text" },
-        { title: 'Nivel Máximo Salario', key: "max_wage_text" },
+        { title: 'Puesto', key: "position.name" },
+        { title: 'Departamento', key: "department.name" },
+        { title: 'Salario', key: "wage" },
+        { title: 'Recomendado por', key: "recommended.name" },
         { title: 'Acciones', key: "actions", sortable: false },
     ]
 
@@ -118,14 +129,14 @@
         let { valid } = await formRef.value!.validate();
 
         if (valid) {
-            const values = {...formData.value}
+            const values = {...formData.value, workerType: WorkerType.candidate}
             if (values.id){
                 await update(values);
             } else {
                 await create(values);
             }
             reset();
-            items.value = await getAll();
+            items.value = await getAll(workerType.value);
         }
 
         return valid
@@ -135,10 +146,10 @@
         formData.value = await getById(id);
     }
 
-    const onDelete = async (values: Position) => {
+    const onDelete = async (values: Worker) => {
     try {
       await update({ ...values, state: false })
-      items.value = await getAll();
+      items.value = await getAll(workerType.value);
     } catch({ response: { data: { detail } } }: AxiosError) {
       showSnackbar.value = true;
       snackbarText.value = detail
@@ -147,6 +158,6 @@
 
     const reset = () => {
       formRef.value!.reset();
-      formData.value = new Position();
+      formData.value = new Worker();
     }
 </script>

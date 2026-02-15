@@ -77,5 +77,10 @@ src/layouts/Default.vue
       icon: 'mdi-sitemap-outline',
       title: 'Departamentos'
     },
+    {
+      route: '/candidate',
+      icon: 'mdi-account-edit',
+      title: 'Candidatos'
+    },
   ])
 </script>

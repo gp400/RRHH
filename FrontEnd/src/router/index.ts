@@ -5,6 +5,7 @@ import LanguageView from '@/views/LanguageView.vue'
 import TrainingView from '@/views/TrainingView.vue'
 import PositionView from '@/views/PositionView.vue'
 import DepartmentView from '@/views/DepartmentView.vue'
+import CandidateView from '@/views/CandidateView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,6 +19,7 @@ const router = createRouter({
         { path: "training", name: 'training', component: TrainingView },
         { path: "position", name: 'position', component: PositionView },
         { path: "department", name: 'department', component: DepartmentView },
+        { path: "candidate", name: 'candidate', component: CandidateView },
         { path: "", redirect: "competence" }
       ]
     }
