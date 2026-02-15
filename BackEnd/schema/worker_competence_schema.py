@@ -6,5 +6,6 @@ class WorkerCompetenceSchema(BaseModel):
     id: int | None
     worker_id: int | None
     competence_id: int | None
+    state: bool
 
     competence: CompetenceSchema | None

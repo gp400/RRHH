@@ -6,10 +6,13 @@ from db.models.worker import Worker
 from db.models.worker_competence import WorkerCompetence
 from db.models.worker_training import WorkerTraining
 from enums.position_risk_level import PositionRiskLevel
+from enums.training_level import TrainingLevel
 from enums.worker_type import WorkerType
+from schema.competence_schema import CompetenceSchema
 from schema.department_schema import DepartmentSchema
 from schema.experience_schema import ExperienceSchema
 from schema.position_schema import PositionSchema
+from schema.training_schema import TrainingSchema
 from schema.worker_competence_schema import WorkerCompetenceSchema
 from schema.worker_schema import WorkerSchema
 from schema.worker_training_schema import WorkerTrainingSchema
@@ -30,6 +33,7 @@ def get_db():
 @router.get("/get_all/{workerType}")
 def get_all(workerType: int, db: Session = Depends(get_db)):
     workers: list[type[Worker]] = db.query(Worker).filter(Worker.state, Worker.type == workerType).all()
+
     return list(map(lambda worker: WorkerSchema(
         id=worker.id,
         identification=worker.identification,
@@ -61,8 +65,16 @@ def get_all(workerType: int, db: Session = Depends(get_db)):
             type=WorkerType(worker.recommended.type),
             state=worker.recommended.state
         ),
-        worker_competences=list(map(lambda wc: WorkerCompetenceSchema(id=wc.id, worker_id=wc.worker_id, competence_id=wc.competence_id, competence=wc.competence), worker.worker_competences)),
-        worker_trainings=list(map(lambda wt: WorkerTrainingSchema(id=wt.id, worker_id=wt.worker_id, training_id=wt.training_id, training=wt.training), worker.worker_trainings)),
+        worker_competences=list(map(lambda wc: WorkerCompetenceSchema(id=wc.id, worker_id=wc.worker_id, competence_id=wc.competence_id, state=wc.state, competence=CompetenceSchema(id=wc.competence.id, name=wc.competence.name, description=wc.competence.description, state=wc.competence.state)), worker.worker_competences)),
+        worker_trainings=list(map(lambda wt: WorkerTrainingSchema(id=wt.id, worker_id=wt.worker_id, training_id=wt.training_id, state=wt.state, training=TrainingSchema(
+            id=wt.training.id,
+            description=wt.training.description,
+            level=TrainingLevel(wt.training.level),
+            initial_date=wt.training.initial_date,
+            end_date=wt.training.end_date,
+            institution=wt.training.institution,
+            state=wt.training.state,
+        )), worker.worker_trainings)),
         experiences=list(map(lambda e: ExperienceSchema(id=e.id, company=e.company, position=e.position, description=e.description, initial_date=e.initial_date, end_date=e.end_date, wage=e.wage, worker_id=e.worker_id, state=e.state), worker.experiences)),
         state=worker.state,
     ), workers))
@@ -106,14 +118,31 @@ def get_by_id(id: int, db: Session = Depends(get_db)):
             type=WorkerType(worker_db.recommended.type),
             state=worker_db.recommended.state
         ),
-        worker_competences=list(map(lambda wc: WorkerCompetenceSchema(id=wc.id, worker_id=wc.worker_id, competence_id=wc.competence_id, competence=wc.competence), worker_db.worker_competences)),
-        worker_trainings=list(map(lambda wt: WorkerTrainingSchema(id=wt.id, worker_id=wt.worker_id, training_id=wt.training_id, training=wt.training), worker_db.worker_trainings)),
+        worker_competences=list(map(lambda wc: WorkerCompetenceSchema(id=wc.id, worker_id=wc.worker_id, competence_id=wc.competence_id, state=wc.state, competence=CompetenceSchema(id=wc.competence.id, name=wc.competence.name, description=wc.competence.description, state=wc.competence.state)), worker_db.worker_competences)),
+        worker_trainings=list(map(lambda wt: WorkerTrainingSchema(id=wt.id, worker_id=wt.worker_id, training_id=wt.training_id, state=wt.state, training=TrainingSchema(
+            id=wt.training.id,
+            description=wt.training.description,
+            level=TrainingLevel(wt.training.level),
+            initial_date=wt.training.initial_date,
+            end_date=wt.training.end_date,
+            institution=wt.training.institution,
+            state=wt.training.state,
+        )), worker_db.worker_trainings)),
         experiences=list(map(lambda e: ExperienceSchema(id=e.id, company=e.company, position=e.position, description=e.description, initial_date=e.initial_date, end_date=e.end_date, wage=e.wage, worker_id=e.worker_id, state=e.state), worker_db.experiences)),
         state=worker_db.state,
     )
 
 @router.post("/create", status_code=201)
 def create(worker: WorkerSchema, db: Session = Depends(get_db)):
+
+    for competence in worker.worker_competences:
+        competence.state = True
+
+    for training in worker.worker_trainings:
+        training.state = True
+
+    for experience in worker.experiences:
+        experience.state = True
 
     worker_db = Worker(
         identification=worker.identification,
@@ -124,27 +153,6 @@ def create(worker: WorkerSchema, db: Session = Depends(get_db)):
         wage=worker.wage,
         initial_date=worker.initial_date,
         type=worker.type.value,
-        position=PositionSchema(
-            id=worker.position.id,
-            name=worker.position.name,
-            risk_level=PositionRiskLevel(worker.position.risk_level),
-            min_wage=worker.position.min_wage,
-            max_wage=worker.position.max_wage,
-            state=worker.position.state
-        ),
-        department=DepartmentSchema(id=worker.department.id, name=worker.department.name, description=worker.department.description, state=worker.department.state),
-        recommended=None if worker.recommended is None else WorkerSchema(
-            id=worker.recommended.id,
-            identification=worker.recommended.identification,
-            name=worker.recommended.name,
-            position_id=worker.recommended.position_id,
-            department_id=worker.recommended.department_id,
-            recommended_id=worker.recommended.recommended_id,
-            wage=worker.recommended.wage,
-            initial_date=worker.recommended.initial_date,
-            type=WorkerType(worker.recommended.type),
-            state=worker.recommended.state
-        ),
         worker_competences=list(map(lambda wc: WorkerCompetence(competence_id=wc.competence_id), worker.worker_competences)),
         worker_trainings=list(map(lambda wt: WorkerTraining(training_id=wt.training_id), worker.worker_trainings)),
         experiences=list(map(lambda e: Experience(company=e.company, position=e.position, description=e.description, initial_date=e.initial_date, end_date=e.end_date, wage=e.wage, worker_id=e.worker_id, state=True), worker.experiences)),
@@ -165,8 +173,16 @@ def create(worker: WorkerSchema, db: Session = Depends(get_db)):
         wage=worker_db.wage,
         initial_date=worker_db.initial_date,
         type=WorkerType(worker_db.type),
-        worker_competences=list(map(lambda wc: WorkerCompetenceSchema(id=wc.id, worker_id=wc.worker_id, competence_id=wc.competence_id, competence=wc.competence), worker_db.worker_competences)),
-        worker_trainings=list(map(lambda wt: WorkerTrainingSchema(id=wt.id, worker_id=wt.worker_id, training_id=wt.training_id, training=wt.training), worker_db.worker_trainings)),
+        worker_competences=list(map(lambda wc: WorkerCompetenceSchema(id=wc.id, worker_id=wc.worker_id, competence_id=wc.competence_id, state=wc.state, competence=CompetenceSchema(id=wc.competence.id, name=wc.competence.name, description=wc.competence.description, state=wc.competence.state)), worker.worker_competences)),
+        worker_trainings=list(map(lambda wt: WorkerTrainingSchema(id=wt.id, worker_id=wt.worker_id, training_id=wt.training_id, state=wt.state, training=TrainingSchema(
+            id=wt.training.id,
+            description=wt.training.description,
+            level=TrainingLevel(wt.training.level),
+            initial_date=wt.training.initial_date,
+            end_date=wt.training.end_date,
+            institution=wt.training.institution,
+            state=wt.training.state,
+        )), worker.worker_trainings)),
         experiences=list(map(lambda e: ExperienceSchema(id=e.id, company=e.company, position=e.position, description=e.description, initial_date=e.initial_date, end_date=e.end_date, wage=e.wage, worker_id=e.worker_id, state=e.state), worker_db.experiences)),
         state=worker_db.state,
     )
@@ -181,6 +197,18 @@ def update(worker: WorkerSchema, db: Session = Depends(get_db)):
     if any(w.state == True for w in worker_db.workers) and worker.state == False:
         raise  HTTPException(status_code=400, detail=recommended_message)
 
+    for competence in worker_db.worker_competences:
+        competence.state = False
+
+    for competence in worker.worker_competences:
+        competence.state = worker.state
+
+    for training in worker.worker_trainings:
+        training.state = worker.state
+
+    for experience in worker.experiences:
+        experience.state = worker.state
+
     worker_db.identification = worker.identification
     worker_db.name = worker.name
     worker_db.position_id = worker.position_id
@@ -190,8 +218,8 @@ def update(worker: WorkerSchema, db: Session = Depends(get_db)):
     worker_db.initial_date = worker.initial_date
     worker_db.type = worker.type.value
     worker_db.worker_competences = list(
-        map(lambda wc: WorkerCompetence(competence_id=wc.competence_id), worker.worker_competences))
-    worker_db.worker_trainings = list(map(lambda wt: WorkerTraining(training_id=wt.training_id), worker.worker_trainings))
+        map(lambda wc: WorkerCompetence(competence_id=wc.competence_id, state=wc.state), worker.worker_competences))
+    worker_db.worker_trainings = list(map(lambda wt: WorkerTraining(training_id=wt.training_id, state=wt.state), worker.worker_trainings))
     worker_db.experiences = list(map(lambda e: Experience(company=e.company, position=e.position, description=e.description,
                                                 initial_date=e.initial_date, end_date=e.end_date, wage=e.wage,
                                                 worker_id=e.worker_id, state=True), worker.experiences))
@@ -232,8 +260,16 @@ def update(worker: WorkerSchema, db: Session = Depends(get_db)):
             type=WorkerType(worker_db.recommended.type),
             state=worker_db.recommended.state
         ),
-        worker_competences=list(map(lambda wc: WorkerCompetenceSchema(id=wc.id, worker_id=wc.worker_id, competence_id=wc.competence_id, competence=wc.competence), worker_db.worker_competences)),
-        worker_trainings=list(map(lambda wt: WorkerTrainingSchema(id=wt.id, worker_id=wt.worker_id, training_id=wt.training_id, training=wt.training), worker_db.worker_trainings)),
+        worker_competences=list(map(lambda wc: WorkerCompetenceSchema(id=wc.id, worker_id=wc.worker_id, competence_id=wc.competence_id, state=wc.state, competence=CompetenceSchema(id=wc.competence.id, name=wc.competence.name, description=wc.competence.description, state=wc.competence.state)), worker.worker_competences)),
+        worker_trainings=list(map(lambda wt: WorkerTrainingSchema(id=wt.id, worker_id=wt.worker_id, training_id=wt.training_id, state=wt.state, training=TrainingSchema(
+            id=wt.training.id,
+            description=wt.training.description,
+            level=TrainingLevel(wt.training.level),
+            initial_date=wt.training.initial_date,
+            end_date=wt.training.end_date,
+            institution=wt.training.institution,
+            state=wt.training.state,
+        )), worker.worker_trainings)),
         experiences=list(map(lambda e: ExperienceSchema(id=e.id, company=e.company, position=e.position, description=e.description, initial_date=e.initial_date, end_date=e.end_date, wage=e.wage, worker_id=e.worker_id, state=e.state), worker_db.experiences)),
         state=worker_db.state,
     )

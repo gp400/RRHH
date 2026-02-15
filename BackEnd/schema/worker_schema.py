@@ -16,7 +16,7 @@ class WorkerSchema(BaseModel):
     department_id: int
     recommended_id: int | None
     wage: int
-    initial_date: datetime.date
+    initial_date: datetime.date | None
     type: WorkerType
     state: bool
 
