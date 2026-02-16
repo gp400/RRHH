@@ -27,17 +27,62 @@
     :items-per-page-text
   >
     <v-form ref="formRef" @submit.prevent class="pt-3 px-3">
-      <v-text-field
-        class="mb-3"
-        v-model="formData.name"
-        label="Nombre"
-        :rules="requiredRule"
-      />
-
-      <v-textarea
-        v-model="formData.description"
-        label="Descripcion"
-      />
+      <v-row>
+        <v-col cols="12" md="6">
+          <v-text-field
+              v-model="formData.identification"
+              label="Cédula (Sin guiones)"
+              :rules="[...requiredRule, ...numberRule, ...maxLengthRule(indentificationCounter), ...identificacionRule]"
+              @input="(e: InputEvent) => filterNumbers(e, 'identification')"
+              :counter="indentificationCounter"
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-text-field
+              v-model="formData.name"
+              label="Nombre"
+              :rules="requiredRule"
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-text-field
+            v-model="formData.initial_date"
+            type="date"
+            label="Fecha Inicio"
+            :rules="requiredRule"
+            clearable
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-select
+            v-model="formData.department_id"
+            :items="departmentOptions"
+            item-title="name"
+            item-value="id"
+            label="Departamento"
+            :rules="requiredRule"
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-select
+            v-model="formData.position_id"
+            :items="positionOptions"
+            item-title="name"
+            item-value="id"
+            label="Puesto al que aspira"
+            :rules="requiredRule"
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-text-field
+            v-model="formData.wage"
+            type="number"
+            label="Salario Mensual"
+            min="1"
+            :rules="[ ...requiredRule, ...greaterOrEqualThanRule(1) ]"
+          />
+        </v-col>
+      </v-row>
     </v-form>
   </CrudComponent>
 </template>
@@ -46,11 +91,18 @@
     import CrudComponent from '@/components/CrudComponent.vue';
     import { useWorker } from '@/composables/useWorker';
     import { Worker } from '@/dto/Worker';
-    import { requiredRule } from '@/utils/Validations';
+    import { requiredRule, numberRule, maxLengthRule, identificacionRule, greaterOrEqualThanRule } from '@/utils/Validations';
     import { onMounted, ref } from 'vue';
     import { DataTableHeader } from 'vuetify';
     import { VForm } from 'vuetify/components';
     import { WorkerType } from '@/enum/workerType';
+    import { usePosition } from '@/composables/usePosition';
+    import { useDepartment } from '@/composables/useDepartment';
+    import { Position } from '@/dto/Position';
+    import { Department } from '@/dto/Department';
+
+    const { getAll: getAllPositions } = usePosition()
+    const { getAll: getAllDepartments } = useDepartment()
 
     const { 
         getAll,
@@ -66,13 +118,18 @@
     const formRef = ref<InstanceType<typeof VForm> | null>(null);
     const formData = ref(new Worker());
 
+    const indentificationCounter = ref<number>(11);
     const workerType = ref<WorkerType>(WorkerType.employee);
     const items = ref<Worker[]>([]);
+    const positionOptions = ref<Position[]>([]);
+    const departmentOptions = ref<Department[]>([]);
     const showSnackbar = ref<boolean>(false);
     const snackbarText = ref<string>('');
 
     onMounted(async() => {
         items.value = await getAll(workerType.value);
+        positionOptions.value = await getAllPositions();
+        departmentOptions.value = await getAllDepartments();
     })
 
     const headers: DataTableHeader[] = [
@@ -82,7 +139,6 @@
         { title: 'Departamento', key: "department.name" },
         { title: 'Puesto', key: "position.name" },
         { title: 'Salario Mensual', key: "wage_text" },
-        { title: 'Recomendado por', key: "recommended.name" },
         { title: 'Acciones', key: "actions", sortable: false },
     ]
 

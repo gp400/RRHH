@@ -15,6 +15,31 @@
     </div>
   </div>
   </v-snackbar>
+
+  <v-dialog v-model="dialog" max-width="600">
+    <v-card>
+      <v-card-title>Seleccionar Candidado</v-card-title>
+
+      <v-form ref="formLaboralRef" @submit.prevent class="pt-3 px-3">
+        <v-text-field
+          v-model="formData.initial_date"
+          type="date"
+          label="Fecha de Inicio Laboral"
+          :rules="requiredRule"
+          clearable
+        />
+      </v-form>
+      
+      <v-card-actions>
+        <v-spacer></v-spacer>
+
+        <v-btn class="text-none" color="red" @click="onCancelHire"> Cancelar </v-btn>
+
+        <v-btn class="text-none" color="primary" @click="submit"> Guardar </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
   <CrudComponent
     :title
     :btn-text
@@ -24,6 +49,7 @@
     :items
     :on-edit
     :on-delete
+    :on-update="onHire"
     :items-per-page-text
     :disabled="isAddingExperience"
     :competence-headers
@@ -301,7 +327,9 @@
     const btnText = 'Crear Candidato';
     const itemsPerPageText = 'Candidatos por pagina'
 
+    const dialog = ref<boolean>(false);
     const formRef = ref<InstanceType<typeof VForm> | null>(null);
+    const formLaboralRef = ref<InstanceType<typeof VForm> | null>(null);
     const formData = ref(new Worker());
     const competenceId = ref<number | null>(null);
     const trainingId = ref<number | null>(null);
@@ -364,7 +392,7 @@
 
     const experienceHeaders: DataTableHeader[] = [
         { title: 'Empresa', key: "company" },
-        { title: 'Position', key: "position" },
+        { title: 'Puesto', key: "position" },
         { title: 'Fecha Desde', key: "initial_date" },
         { title: 'Fecha Fin', key: "end_date" },
         { title: 'Salario', key: "wage" },
@@ -384,10 +412,11 @@
     }
 
     const submit = async (): Promise<boolean> => {
-        let { valid } = await formRef.value!.validate();
+        const form = formRef.value ?? formLaboralRef.value;
+        let { valid } = await form!.validate();
 
         if (valid) {
-            const values = {...formData.value, type: WorkerType.candidate};
+            const values = {...formData.value, type: formData.value.type ?? WorkerType.candidate};
             if (values.id){
                 await update(values);
             } else {
@@ -406,19 +435,32 @@
     }
 
     const onDelete = async (values: Worker) => {
-    try {
-      await update({ ...values, state: false })
-      items.value = await getAll(workerType.value);
-    } catch({ response: { data: { detail } } }: AxiosError) {
-      showSnackbar.value = true;
-      snackbarText.value = detail
+      try {
+        await update({ ...values, state: false })
+        items.value = await getAll(workerType.value);
+      } catch({ response: { data: { detail } } }: AxiosError) {
+        showSnackbar.value = true;
+        snackbarText.value = detail
+      }
     }
+
+    const onHire = async (id: number) => {
+        await onEdit(id);
+        formData.value.type = WorkerType.employee;
+        dialog.value=true;
+    }
+
+    const onCancelHire = () => {
+      dialog.value = false;
+      formData.value = new Worker();
     }
 
     const reset = () => {
-      formRef.value!.reset();
+      formRef.value?.reset();
+      formLaboralRef.value?.reset();
       formData.value = new Worker();
       isAddingExperience.value = false
+      dialog.value = false;
       experience.value = new Experience();
     }
 

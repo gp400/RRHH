@@ -55,6 +55,11 @@
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </div>
+        <div v-if="showUpdate" class="pa-2">
+          <v-btn icon color="green" @click="onUpdate(item.id!)">
+            <v-icon>mdi-file-sign</v-icon>
+          </v-btn>
+        </div>
       </div>
     </template>
   </v-data-table>
@@ -78,8 +83,10 @@
     itemsPerPageText: String,
     itemsPerPage: number,
     hideDefaultFooter: boolean,
+    showUpdate: boolean,
     onEdit: Function,
-    onDelete: Function
+    onDelete: Function,
+    onUpdate: Function
   }>()
   
   const noDataText = 'No existen registros'

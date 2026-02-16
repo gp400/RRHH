@@ -80,7 +80,7 @@
     </v-col>
   </v-row>
 
-  <v-dialog v-model="dialog" max-width="600px" persistent>
+  <v-dialog v-model="dialog" max-width="600" persistent>
     <v-card>
       <v-card-title> Complete los campos </v-card-title>
 
@@ -107,9 +107,11 @@
         :search
         :on-edit="handleEdit"
         :on-delete="handleDelete"
+        :on-update="handleUpdate"
         :items-per-page-text
         :items-per-page
         :hide-default-footer
+        :show-update="showUpdate"
       />
 
   </div>
@@ -141,6 +143,7 @@
         submit: Function;
         onEdit: Function;
         onDelete: Function;
+        onUpdate: Function;
         setDoctorId: Function;
         setPatientId: Function;
         setInitialDate: Function;
@@ -155,6 +158,7 @@
     const endDate = ref<Date | null>(null);
     const hideDefaultFooter = ref<boolean>(false);
     const showExpand = ref<boolean>(props.showExpand);
+      const showUpdate = ref<boolean>(!!props.onUpdate);
     const pdfContent = ref<HTMLDivElement | null>(null);
     const headers = ref<DataTableHeader[]>(props.headers);
 
@@ -171,6 +175,11 @@
     const handleDelete = (item: T) => {
         props.onDelete(item);
     };
+
+    const handleUpdate = (id: number) => {
+      props.onEdit(id);
+      props.onUpdate(id);
+    }
 
     const onCancel = () => {
         props.reset();

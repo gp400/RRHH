@@ -1,7 +1,11 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from db.database import SessionLocal
+from db.models.competence import Competence
 from db.models.experience import Experience
+from db.models.training import Training
 from db.models.worker import Worker
 from db.models.worker_competence import WorkerCompetence
 from db.models.worker_training import WorkerTraining
@@ -21,7 +25,7 @@ router = APIRouter()
 
 not_found_message_employee = "Empleado no encontrado."
 not_found_message_candidate = "Candidato no encontrado."
-recommended_message = "El Empleado no se puede eliminar porque posee candidatos relacionados."
+recommended_message = "El Empleado no se puede eliminar porque posee Candidatos relacionados."
 
 def get_db():
     db = SessionLocal()
@@ -31,8 +35,25 @@ def get_db():
         db.close()
 
 @router.get("/get_all/{workerType}")
-def get_all(workerType: int, db: Session = Depends(get_db)):
-    workers: list[type[Worker]] = db.query(Worker).filter(Worker.state, Worker.type == workerType).all()
+def get_all(
+        workerType: int,
+        position_id: Optional[int] = None,
+        competence_id: Optional[int] = None,
+        training_id: Optional[int] = None,
+        db: Session = Depends(get_db)):
+
+    query = db.query(Worker).filter(Worker.state, Worker.type == workerType)
+
+    if position_id is not None:
+        query = query.filter(Worker.position_id == position_id)
+
+    if competence_id is not None:
+        query = query.filter(Worker.worker_competences.any(Competence.id == competence_id))
+
+    if training_id is not None:
+        query = query.filter(Worker.worker_trainings.contains(Training.id == training_id))
+
+    workers: list[type[Worker]] = query.all()
 
     return list(map(lambda worker: WorkerSchema(
         id=worker.id,
