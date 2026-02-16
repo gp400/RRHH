@@ -15,6 +15,7 @@ export class Worker {
     initial_date: Date | null = null
     type: WorkerType | null = null
     state: boolean = true
+    wage_text: string = ''
 
     position: Position | null = null
     department: Department | null = null

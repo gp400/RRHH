@@ -153,8 +153,8 @@ def create(worker: WorkerSchema, db: Session = Depends(get_db)):
         wage=worker.wage,
         initial_date=worker.initial_date,
         type=worker.type.value,
-        worker_competences=list(map(lambda wc: WorkerCompetence(competence_id=wc.competence_id), worker.worker_competences)),
-        worker_trainings=list(map(lambda wt: WorkerTraining(training_id=wt.training_id), worker.worker_trainings)),
+        worker_competences=list(map(lambda wc: WorkerCompetence(competence_id=wc.competence_id, state=wc.state), worker.worker_competences)),
+        worker_trainings=list(map(lambda wt: WorkerTraining(training_id=wt.training_id, state=wt.state), worker.worker_trainings)),
         experiences=list(map(lambda e: Experience(company=e.company, position=e.position, description=e.description, initial_date=e.initial_date, end_date=e.end_date, wage=e.wage, worker_id=e.worker_id, state=True), worker.experiences)),
         state=True
     )
@@ -196,9 +196,6 @@ def update(worker: WorkerSchema, db: Session = Depends(get_db)):
 
     if any(w.state == True for w in worker_db.workers) and worker.state == False:
         raise  HTTPException(status_code=400, detail=recommended_message)
-
-    for competence in worker_db.worker_competences:
-        competence.state = False
 
     for competence in worker.worker_competences:
         competence.state = worker.state

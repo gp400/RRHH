@@ -9,14 +9,14 @@ export function useTraining() {
   const getAll = async (): Promise<Training[]> => {
     const { data } = await apiClient.get<Training[]>(`/${route}/get_all`);
     data.forEach(train => {
-      train.levelText = parseTrainingLevel(train.level!);
+      train.level_text = parseTrainingLevel(train.level!);
     })
     return data;
   } 
 
   const getById = async (id: number): Promise<Training> => {
     const { data } = await apiClient.get<Training>(`/${route}/get_by_id/${id}`);
-    data.levelText = parseTrainingLevel(data.level!);
+    data.level_text = parseTrainingLevel(data.level!);
     return data;
   }
 

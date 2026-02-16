@@ -8,5 +8,5 @@ export class Training {
     end_date: Date | null = null;
     institution: string = '';
     state: boolean = true;
-    levelText: string = '';
+    level_text: string = '';
 }

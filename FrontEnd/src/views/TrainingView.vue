@@ -119,7 +119,7 @@ import { parseTrainingLevel } from '@/utils/parseTrainingLevel';
     })
 
     const headers: DataTableHeader[] = [
-        { title: 'Nivel', key: "levelText" },
+        { title: 'Nivel', key: "level_text" },
         { title: 'Fecha Desde', key: "initial_date" },
         { title: 'Fecha Hasta', key: "end_date" },
         { title: 'Institución', key: "institution" },

@@ -79,8 +79,13 @@ src/layouts/Default.vue
     },
     {
       route: '/candidate',
-      icon: 'mdi-account-edit',
+      icon: 'mdi-account-search',
       title: 'Candidatos'
+    },
+    {
+      route: '/employee',
+      icon: 'mdi-badge-account',
+      title: 'Empleados'
     },
   ])
 </script>

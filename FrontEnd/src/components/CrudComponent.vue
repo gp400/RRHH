@@ -80,7 +80,7 @@
     </v-col>
   </v-row>
 
-  <v-dialog v-model="dialog" max-width="500px" persistent>
+  <v-dialog v-model="dialog" max-width="600px" persistent>
     <v-card>
       <v-card-title> Complete los campos </v-card-title>
 
@@ -90,7 +90,7 @@
 
         <v-btn class="text-none" @click="onCancel" color="red"> Cancelar </v-btn>
 
-        <v-btn class="text-none" color="primary" @click="handleSubmit"> Guardar </v-btn>
+        <v-btn :disabled class="text-none" color="primary" @click="handleSubmit"> Guardar </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -99,7 +99,9 @@
       
       <DataTableComponent
         :headers
-        :child-headers="childHeaders"
+        :competence-headers="competenceHeaders"
+        :training-headers="trainingHeaders"
+        :experience-headers="experienceHeaders"
         :items
         :show-expand
         :search
@@ -122,11 +124,14 @@
     import html2pdf from "html2pdf.js";
 
     const props = defineProps<{
+        disabled: boolean;
         title: String;
         btnText: String;
         itemsPerPageText: String;
         headers: DataTableHeader[];
-        childHeaders: DataTableHeader[];
+        competenceHeaders: DataTableHeader[];
+        trainingHeaders: DataTableHeader[];
+        experienceHeaders: DataTableHeader[];
         items: T[];
         showExpand: boolean;
         showPrint: boolean;

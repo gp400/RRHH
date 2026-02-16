@@ -10,5 +10,5 @@ class ExperienceSchema(BaseModel):
     initial_date: datetime.date
     end_date: datetime.date
     wage: int
-    worker_id: int
+    worker_id: int | None
     state: bool
