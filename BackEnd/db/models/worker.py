@@ -25,3 +25,4 @@ class Worker(Base):
     worker_trainings = relationship("WorkerTraining", back_populates="worker")
     experiences = relationship("Experience", back_populates="worker")
     workers = relationship("Worker", back_populates="recommended")
+    users = relationship("User", back_populates="worker")

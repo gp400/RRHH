@@ -7,3 +7,4 @@ from db.models import experience
 from db.models import worker_competence
 from db.models import worker_training
 from db.models import worker
+from db.models import user

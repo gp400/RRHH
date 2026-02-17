@@ -8,6 +8,7 @@ import DepartmentView from '@/views/DepartmentView.vue'
 import CandidateView from '@/views/CandidateView.vue'
 import EmployeeView from '@/views/EmployeeView.vue'
 import ReportView from '@/views/ReportView.vue'
+import LoginView from '@/views/LoginView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,10 @@ const router = createRouter({
         { path: "report", name: 'report', component: ReportView },
         { path: "", redirect: "competence" }
       ]
+    },
+    {
+      path: '/login',
+      component: LoginView
     }
   ],
 })
