@@ -8,8 +8,14 @@ const route: String = "worker";
 
 export function useWorker() {
   
-  const getAll = async (workerType: WorkerType): Promise<Worker[]> => {
-    const { data } = await apiClient.get<Worker[]>(`/${route}/get_all/${workerType}`);
+  const getAll = async (workerType: WorkerType, position_id: number | null = null, competence_id: number | null = null, training_id: number | null = null): Promise<Worker[]> => {
+    const { data } = await apiClient.get<Worker[]>(`/${route}/get_all/${workerType}`, {
+      params: {
+        position_id,
+        competence_id,
+        training_id
+      }
+    });
     data.forEach(worker => {
       worker.wage_text = salaryFormatter(worker.wage!)
       worker.worker_trainings.forEach(wt => {

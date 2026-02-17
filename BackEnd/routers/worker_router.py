@@ -42,16 +42,21 @@ def get_all(
         training_id: Optional[int] = None,
         db: Session = Depends(get_db)):
 
-    query = db.query(Worker).filter(Worker.state, Worker.type == workerType)
+    query = (db.query(Worker)
+            .join(WorkerCompetence, Worker.id == WorkerCompetence.worker_id)
+            .join(Competence, WorkerCompetence.competence_id == Competence.id)
+            .join(WorkerTraining, Worker.id == WorkerTraining.worker_id)
+            .join(Training, WorkerTraining.training_id == Training.id)
+            .filter(Worker.state, Worker.type == workerType))
 
     if position_id is not None:
         query = query.filter(Worker.position_id == position_id)
 
     if competence_id is not None:
-        query = query.filter(Worker.worker_competences.any(Competence.id == competence_id))
+        query = query.filter(Competence.id == competence_id)
 
     if training_id is not None:
-        query = query.filter(Worker.worker_trainings.contains(Training.id == training_id))
+        query = query.filter(Training.id == training_id)
 
     workers: list[type[Worker]] = query.all()
 

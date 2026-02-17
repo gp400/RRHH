@@ -24,11 +24,48 @@
             hide-details
           />
         </v-col>
+        <v-col cols="12" v-if="setPositionId || setCompetenceId || setTrainingId">
+          <v-row justify="end">
+            <v-col cols="12" md="6" v-if="setPositionId">
+              <v-select
+                :items="positionOptions"
+                item-title="name"
+                item-value="id"
+                label="Puesto"
+                @update:model-value="setPositionId"
+                clearable
+                hide-details
+              />
+            </v-col>
+            <v-col cols="12" md="6" v-if="setCompetenceId">
+              <v-select
+                :items="competenceOptions"
+                item-title="name"
+                item-value="id"
+                label="Competencia"
+                @update:model-value="setCompetenceId"
+                clearable
+                hide-details
+              />
+            </v-col>
+            <v-col cols="12" md="6" v-if="setTrainingId">
+              <v-select
+                :items="trainingOptions"
+                :item-title="item => `${item.institution}-${parseTrainingLevel(item.level)}`"
+                item-value="id"
+                label="Capacitacion"
+                @update:model-value="setTrainingId"
+                clearable
+                hide-details
+              />
+            </v-col>
+          </v-row>
+        </v-col>
         <v-col cols="12" v-if="setDoctorId || setPatientId">
           <v-row justify="end">
             <v-col cols="12" md="6" v-if="setDoctorId">
               <v-select
-                :items="doctorOptions"
+                :items="positionOptions"
                 item-title="Name"
                 item-value="Id"
                 label="Doctor"
@@ -39,7 +76,7 @@
             </v-col>
             <v-col cols="12" md="6" v-if="setPatientId">
               <v-select
-                :items="patientOptions"
+                :items="trainingOptions"
                 item-title="Name"
                 item-value="Id"
                 label="Paciente"
@@ -124,6 +161,10 @@
     import { Doctor } from "@/dto/Doctor";
     import { Patient } from "@/dto/Patient";
     import html2pdf from "html2pdf.js";
+    import { Position } from "@/dto/Position";
+    import { Competence } from "@/dto/Competence";
+    import { Training } from "@/dto/Training";
+import { parseTrainingLevel } from "@/utils/parseTrainingLevel";
 
     const props = defineProps<{
         disabled: boolean;
@@ -137,8 +178,9 @@
         items: T[];
         showExpand: boolean;
         showPrint: boolean;
-        doctorOptions: Doctor[];
-        patientOptions: Patient[];
+        positionOptions: Position[];
+        competenceOptions: Competence[];
+        trainingOptions: Training[];
         reset: Function;
         submit: Function;
         onEdit: Function;
@@ -147,7 +189,9 @@
         setDoctorId: Function;
         setPatientId: Function;
         setInitialDate: Function;
-        setEndDate: Function;
+        setPositionId: Function;
+        setCompetenceId: Function;
+        setTrainingId: Function;
     }>();
     
     const search = ref<string>("");

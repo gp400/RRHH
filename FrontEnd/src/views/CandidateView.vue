@@ -56,6 +56,12 @@
     :training-headers
     :experience-headers
     :show-expand
+    :position-options="positionOptions"
+    :competence-options="competenceOptions"
+    :training-options="trainingOptions"
+    :set-position-id="setPositionIdFilter"
+    :set-competence-id="setCompetenceIdFilter"
+    :set-training-id="setTrainingIdFilter"
   >
     <v-form ref="formRef" @submit.prevent class="pt-3 px-3">
       <v-row>
@@ -327,6 +333,10 @@
     const btnText = 'Crear Candidato';
     const itemsPerPageText = 'Candidatos por pagina'
 
+    const positionIdFilter = ref<number | null>(null);
+    const competenceIdFilter = ref<number | null>(null);
+    const trainingIdFilter = ref<number | null>(null);
+
     const dialog = ref<boolean>(false);
     const formRef = ref<InstanceType<typeof VForm> | null>(null);
     const formLaboralRef = ref<InstanceType<typeof VForm> | null>(null);
@@ -403,6 +413,22 @@
       ...experienceHeaders.values(),
       { title: 'Acciones', key: "Actions", sortable: false },
     ]
+
+    const setPositionIdFilter = async (value: number | null) => {
+      console.log(value)
+      positionIdFilter.value = value;
+      items.value = await getAll( workerType.value, positionIdFilter.value, competenceIdFilter.value, trainingIdFilter.value )
+    }
+
+    const setCompetenceIdFilter = async (value: number | null) => {
+      competenceIdFilter.value = value;
+      items.value = await getAll( workerType.value, positionIdFilter.value, competenceIdFilter.value, trainingIdFilter.value )
+    }
+
+    const setTrainingIdFilter = async (value: number | null) => {
+      trainingIdFilter.value = value;
+      items.value = await getAll( workerType.value, positionIdFilter.value, competenceIdFilter.value, trainingIdFilter.value )
+    }
 
     const filterNumbers = (value: InputEvent, prop: string) => {
         const validator = numberRule[0]!;
