@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -40,23 +41,32 @@ def get_all(
         position_id: Optional[int] = None,
         competence_id: Optional[int] = None,
         training_id: Optional[int] = None,
+        initial_date: Optional[datetime.date] = None,
+        end_date: Optional[datetime.date] = None,
         db: Session = Depends(get_db)):
 
-    query = (db.query(Worker)
-            .join(WorkerCompetence, Worker.id == WorkerCompetence.worker_id)
-            .join(Competence, WorkerCompetence.competence_id == Competence.id)
-            .join(WorkerTraining, Worker.id == WorkerTraining.worker_id)
-            .join(Training, WorkerTraining.training_id == Training.id)
-            .filter(Worker.state, Worker.type == workerType))
+    query = db.query(Worker).filter(Worker.state, Worker.type == workerType)
 
     if position_id is not None:
         query = query.filter(Worker.position_id == position_id)
 
     if competence_id is not None:
-        query = query.filter(Competence.id == competence_id)
+        query = (query
+                 .join(WorkerCompetence, Worker.id == WorkerCompetence.worker_id)
+                 .join(Competence, WorkerCompetence.competence_id == Competence.id)
+                 .filter(Competence.id == competence_id))
 
     if training_id is not None:
-        query = query.filter(Training.id == training_id)
+        query = (query
+                 .join(WorkerTraining, Worker.id == WorkerTraining.worker_id)
+                 .join(Training, WorkerTraining.training_id == Training.id)
+                 .filter(Training.id == training_id))
+
+    if initial_date is not None:
+        query = query.filter(Worker.initial_date >= initial_date)
+
+    if end_date is not None:
+        query = query.filter(Worker.initial_date <= end_date)
 
     workers: list[type[Worker]] = query.all()
 

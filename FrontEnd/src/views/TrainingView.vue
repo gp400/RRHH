@@ -81,8 +81,8 @@
     import CrudComponent from '@/components/CrudComponent.vue';
     import { useTraining } from '@/composables/useTraining';
     import { Training } from '@/dto/Training';
-import { TrainingLevel } from '@/enum/trainingLevel';
-import { parseTrainingLevel } from '@/utils/parseTrainingLevel';
+    import { TrainingLevel } from '@/enum/trainingLevel';
+    import { parseTrainingLevel } from '@/utils/parseTrainingLevel';
     import { requiredRule } from '@/utils/Validations';
     import { onMounted, ref } from 'vue';
     import { DataTableHeader } from 'vuetify';

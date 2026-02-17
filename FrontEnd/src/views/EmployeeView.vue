@@ -127,7 +127,7 @@
     const snackbarText = ref<string>('');
 
     onMounted(async() => {
-        items.value = await getAll(workerType.value);
+        items.value = await getAll({ worker_type: workerType.value });
         positionOptions.value = await getAllPositions();
         departmentOptions.value = await getAllDepartments();
     })
@@ -153,7 +153,7 @@
                 await create(values);
             }
             reset();
-            items.value = await getAll(workerType.value);
+            items.value = await getAll({ worker_type: workerType.value });;
         }
 
         return valid
@@ -166,7 +166,7 @@
     const onDelete = async (values: Worker) => {
     try {
       await update({ ...values, state: false })
-      items.value = await getAll(workerType.value);
+      items.value = await getAll({ worker_type: workerType.value });;
     } catch({ response: { data: { detail } } }: AxiosError) {
       showSnackbar.value = true;
       snackbarText.value = detail

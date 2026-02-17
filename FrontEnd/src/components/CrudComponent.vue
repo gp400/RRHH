@@ -164,7 +164,7 @@
     import { Position } from "@/dto/Position";
     import { Competence } from "@/dto/Competence";
     import { Training } from "@/dto/Training";
-import { parseTrainingLevel } from "@/utils/parseTrainingLevel";
+    import { parseTrainingLevel } from "@/utils/parseTrainingLevel";
 
     const props = defineProps<{
         disabled: boolean;
@@ -202,7 +202,7 @@ import { parseTrainingLevel } from "@/utils/parseTrainingLevel";
     const endDate = ref<Date | null>(null);
     const hideDefaultFooter = ref<boolean>(false);
     const showExpand = ref<boolean>(props.showExpand);
-      const showUpdate = ref<boolean>(!!props.onUpdate);
+    const showUpdate = ref<boolean>(!!props.onUpdate);
     const pdfContent = ref<HTMLDivElement | null>(null);
     const headers = ref<DataTableHeader[]>(props.headers);
 

@@ -22,6 +22,14 @@
 
       <v-form ref="formLaboralRef" @submit.prevent class="pt-3 px-3">
         <v-text-field
+          v-model="formData.wage"
+          type="number"
+          label="Salario"
+          :rules="[ ...requiredRule, ...greaterOrEqualThanRule(1)]"
+          clearable
+        />
+
+        <v-text-field
           v-model="formData.initial_date"
           type="date"
           label="Fecha de Inicio Laboral"
@@ -359,10 +367,10 @@
     const snackbarText = ref<string>('');
 
     onMounted(async() => {
-        items.value = await getAll(workerType.value);
+        items.value = await getAll({ worker_type: workerType.value });
         positionOptions.value = await getAllPositions();
         departmentOptions.value = await getAllDepartments();
-        employeeOptions.value = await getAll(WorkerType.employee);
+        employeeOptions.value = await getAll({ worker_type: WorkerType.employee });
         competenceOptions.value = await getAllCompetences();
         trainingOptions.value = await getAllTraining();
     })
@@ -417,17 +425,17 @@
     const setPositionIdFilter = async (value: number | null) => {
       console.log(value)
       positionIdFilter.value = value;
-      items.value = await getAll( workerType.value, positionIdFilter.value, competenceIdFilter.value, trainingIdFilter.value )
+      items.value = await getAll({ worker_type: workerType.value, position_id: positionIdFilter.value, competence_id: competenceIdFilter.value, training_id: trainingIdFilter.value})
     }
 
     const setCompetenceIdFilter = async (value: number | null) => {
       competenceIdFilter.value = value;
-      items.value = await getAll( workerType.value, positionIdFilter.value, competenceIdFilter.value, trainingIdFilter.value )
+      items.value = await getAll({ worker_type: workerType.value, position_id: positionIdFilter.value, competence_id: competenceIdFilter.value, training_id: trainingIdFilter.value})
     }
 
     const setTrainingIdFilter = async (value: number | null) => {
       trainingIdFilter.value = value;
-      items.value = await getAll( workerType.value, positionIdFilter.value, competenceIdFilter.value, trainingIdFilter.value )
+      items.value = await getAll({ worker_type: workerType.value, position_id: positionIdFilter.value, competence_id: competenceIdFilter.value, training_id: trainingIdFilter.value})
     }
 
     const filterNumbers = (value: InputEvent, prop: string) => {
@@ -449,7 +457,7 @@
                 await create(values);
             }
             reset();
-            items.value = await getAll(workerType.value);
+            items.value = await getAll({ worker_type: workerType.value });
         }
 
         return valid
@@ -463,7 +471,7 @@
     const onDelete = async (values: Worker) => {
       try {
         await update({ ...values, state: false })
-        items.value = await getAll(workerType.value);
+        items.value = await getAll({ worker_type: workerType.value });
       } catch({ response: { data: { detail } } }: AxiosError) {
         showSnackbar.value = true;
         snackbarText.value = detail

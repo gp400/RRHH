@@ -6,14 +6,25 @@ import { salaryFormatter } from '@/utils/salaryFormatter';
 
 const route: String = "worker";
 
+interface AllParams {
+  worker_type: WorkerType;
+  position_id: number | null;
+  competence_id: number | null;
+  training_id: number | null;
+  initial_date: Date | null;
+  end_date: Date | null;
+}
+
 export function useWorker() {
   
-  const getAll = async (workerType: WorkerType, position_id: number | null = null, competence_id: number | null = null, training_id: number | null = null): Promise<Worker[]> => {
-    const { data } = await apiClient.get<Worker[]>(`/${route}/get_all/${workerType}`, {
+  const getAll = async ({ worker_type, position_id, competence_id, training_id, initial_date, end_date }: AllParams): Promise<Worker[]> => {
+    const { data } = await apiClient.get<Worker[]>(`/${route}/get_all/${worker_type}`, {
       params: {
         position_id,
         competence_id,
-        training_id
+        training_id,
+        initial_date,
+        end_date
       }
     });
     data.forEach(worker => {

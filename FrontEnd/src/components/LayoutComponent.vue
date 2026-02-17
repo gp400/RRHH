@@ -1,4 +1,3 @@
-src/layouts/Default.vue
 <template>
   <v-app>
 
@@ -86,6 +85,11 @@ src/layouts/Default.vue
       route: '/employee',
       icon: 'mdi-badge-account',
       title: 'Empleados'
+    },
+    {
+      route: '/report',
+      icon: 'mdi-file-pdf-box',
+      title: 'Reporte'
     },
   ])
 </script>
