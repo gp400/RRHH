@@ -7,12 +7,14 @@ from db.database import SessionLocal
 from db.models.competence import Competence
 from db.models.experience import Experience
 from db.models.training import Training
+from db.models.user import User
 from db.models.worker import Worker
 from db.models.worker_competence import WorkerCompetence
 from db.models.worker_training import WorkerTraining
 from enums.position_risk_level import PositionRiskLevel
 from enums.training_level import TrainingLevel
 from enums.worker_type import WorkerType
+from helpers.hash_helper import hash_string
 from schema.competence_schema import CompetenceSchema
 from schema.department_schema import DepartmentSchema
 from schema.experience_schema import ExperienceSchema
@@ -199,6 +201,14 @@ def create(worker: WorkerSchema, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(worker_db)
 
+    email = f'{worker.name.lower().replace(' ', '')}@rrhh.com'
+    password = hash_string('1234')
+
+    user = User(email=email, password=password, worker_id=worker_db.id, state=True)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
     return WorkerSchema(
         id=worker_db.id,
         identification=worker_db.identification,
@@ -230,9 +240,6 @@ def update(worker: WorkerSchema, db: Session = Depends(get_db)):
     if worker_db is None:
         raise HTTPException(status_code=404, detail=not_found_message_candidate if worker.type == WorkerType.candidate else not_found_message_employee)
 
-    if any(w.state == True for w in worker_db.workers) and worker.state == False:
-        raise  HTTPException(status_code=400, detail=recommended_message)
-
     for competence in worker.worker_competences:
         competence.state = worker.state
 
@@ -260,6 +267,19 @@ def update(worker: WorkerSchema, db: Session = Depends(get_db)):
 
     db.commit()
     db.refresh(worker_db)
+
+    email = f'{worker.name.lower().replace(' ', '')}@rrhh.com'
+    password = hash_string('1234')
+
+    user_db: type[User] = db.query(User).filter(User.worker_id == worker.id, User.state).first()
+
+    user_db.email = email
+    user_db.password = password
+    user_db.worker_id = worker.id
+    user_db.state = worker.state
+
+    db.commit()
+    db.refresh(user_db)
 
     return WorkerSchema(
         id=worker_db.id,

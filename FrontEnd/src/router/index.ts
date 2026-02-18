@@ -28,10 +28,7 @@ const router = createRouter({
         { path: "", redirect: "competence" }
       ]
     },
-    {
-      path: '/login',
-      component: LoginView
-    }
+    { path: '/login', component: LoginView }
   ],
 })
 

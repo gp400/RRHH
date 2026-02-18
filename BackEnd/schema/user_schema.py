@@ -9,4 +9,4 @@ class UserSchema(BaseModel):
     worker_id: int
     state: bool
 
-    worker: WorkerSchema
+    worker: WorkerSchema | None = None

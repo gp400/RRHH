@@ -4,6 +4,11 @@
     <v-app-bar flat color="primary" dark>
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-toolbar-title>Recursos Humanos</v-toolbar-title>
+
+      <v-btn class="text-none close-session">
+        <v-icon>mdi-logout</v-icon>
+        <p class="ps-1">Cerrar Sesion</p>
+      </v-btn>
     </v-app-bar>
 
     <!-- Drawer -->
@@ -31,6 +36,13 @@
     </v-main>
   </v-app>
 </template>
+
+<style scope>
+  .close-session {
+    background: white !important;
+    color: red !important;
+  }
+</style>
 
 <style>
   .list-item-title {
