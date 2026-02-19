@@ -9,6 +9,7 @@ import CandidateView from '@/views/CandidateView.vue'
 import EmployeeView from '@/views/EmployeeView.vue'
 import ReportView from '@/views/ReportView.vue'
 import LoginView from '@/views/LoginView.vue'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,10 +27,24 @@ const router = createRouter({
         { path: "employee", name: 'employee', component: EmployeeView },
         { path: "report", name: 'report', component: ReportView },
         { path: "", redirect: "competence" }
-      ]
+      ],
+      meta: { requiresAuth: true }
     },
     { path: '/login', component: LoginView }
   ],
 })
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  const redirectRoutes = ['/login']
+
+  if (to.meta.requiresAuth && !authStore.JWT) {
+    next("/login")
+  } else if (authStore.JWT && redirectRoutes.includes(to.fullPath.toLocaleLowerCase())) {
+    next('')
+  } else {
+    next()
+  }
+});
 
 export default router

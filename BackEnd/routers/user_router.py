@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from db.database import SessionLocal
 from db.models.user import User
+from enums.worker_type import WorkerType
 from helpers.hash_helper import is_hash_matching
 from schema.user_schema import UserSchema
 
@@ -17,6 +18,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 not_found_message = "Usuario no encontrado."
 credentials_invalid = "Credenciales invalidas."
+not_permission = "El Usuario no tiene permiso."
 
 def get_db():
     db = SessionLocal()
@@ -31,6 +33,9 @@ def login(user: UserSchema, db: Session = Depends(get_db)):
 
     if user_db is None:
         raise HTTPException(status_code=404, detail=not_found_message)
+
+    if WorkerType(user_db.worker.type) != WorkerType.employee:
+        raise HTTPException(status_code=400, detail=not_permission)
 
     password_hash = is_hash_matching(user.password, user_db.password)
 

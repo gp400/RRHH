@@ -5,7 +5,7 @@
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-toolbar-title>Recursos Humanos</v-toolbar-title>
 
-      <v-btn class="text-none close-session">
+      <v-btn class="text-none close-session" @click="logout">
         <v-icon>mdi-logout</v-icon>
         <p class="ps-1">Cerrar Sesion</p>
       </v-btn>
@@ -52,7 +52,9 @@
 </style>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import { useAuthStore } from '@/stores/authStore';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router';
 
   class DrawerRoutes {
     route: String;
@@ -61,6 +63,9 @@
   }
 
   const drawer = ref(true);
+
+  const router = useRouter();
+  const authStore = useAuthStore();
 
   const drawerRoutes = ref<DrawerRoutes[]>([
     {
@@ -104,4 +109,9 @@
       title: 'Reporte'
     },
   ])
+
+  const logout = () => {
+    authStore.clear();
+    router.push('/login')
+  }
 </script>
