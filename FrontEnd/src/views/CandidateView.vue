@@ -59,7 +59,7 @@
     :on-delete
     :on-update="onHire"
     :items-per-page-text
-    :disabled="isAddingExperience"
+    :disabled="isEditingExperienceList"
     :competence-headers
     :training-headers
     :experience-headers
@@ -193,13 +193,14 @@
           </v-data-table>
         </v-col>
         <v-col cols="12">
-          <div v-if="!isAddingExperience" class="text-end" @click="() => { isAddingExperience = true }">
+          <div v-if="!isEditingExperienceList" class="text-end" @click="() => { isEditingExperienceList = true }">
             <v-btn color="primary" class="text-none">Agregar experiencia</v-btn>
           </div>
           <div v-else class="mt-3">
             <v-row>
               <v-col cols="12" md="4">
                 <v-text-field
+                    ref="companyInput"
                     v-model="experience.company"
                     label="Empresa"
                     :rules="[...requiredRule]"
@@ -207,6 +208,7 @@
               </v-col>
               <v-col cols="12" md="4">
                 <v-text-field
+                    ref="positionInput"
                     v-model="experience.position"
                     label="Puesto"
                     :rules="[...requiredRule]"
@@ -214,6 +216,7 @@
               </v-col>
               <v-col cols="12" md="4">
                 <v-text-field
+                  ref="wageInput"
                   v-model="experience.wage"
                   type="number"
                   label="Salario"
@@ -223,6 +226,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
+                  ref="initialDateInput"
                   v-model="experience.initial_date"
                   type="date"
                   label="Fecha Desde"
@@ -233,6 +237,7 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field
+                  ref="endDateInput"
                   v-model="experience.end_date"
                   type="date"
                   label="Fecha Hasta"
@@ -321,7 +326,7 @@
     import { numberRule, requiredRule, maxLengthRule, identificacionRule, greaterOrEqualThanRule } from '@/utils/Validations';
     import { onMounted, ref } from 'vue';
     import { DataTableHeader } from 'vuetify';
-    import { VForm } from 'vuetify/components';
+    import { VForm, VTextField } from 'vuetify/components';
     import { shallowEqual } from '@/utils/shallowEqual';
 
     const { getAll: getAllPositions } = usePosition()
@@ -351,9 +356,6 @@
     const formData = ref(new Worker());
     const competenceId = ref<number | null>(null);
     const trainingId = ref<number | null>(null);
-    const isAddingExperience = ref<boolean>(false);
-    const experience = ref<Experience>(new Experience());
-    const oldExperience = ref<Experience | null>(null);
 
     const indentificationCounter = ref<number>(11);
     const workerType = ref<WorkerType>(WorkerType.candidate);
@@ -365,6 +367,15 @@
     const trainingOptions = ref<Training[]>([]);
     const showSnackbar = ref<boolean>(false);
     const snackbarText = ref<string>('');
+
+    const isEditingExperienceList = ref<boolean>(false);
+    const experience = ref<Experience>(new Experience());
+    const oldExperience = ref<Experience | null>(null);
+    const companyInput = ref<VTextField | null>(null);
+    const positionInput = ref<VTextField | null>(null);
+    const wageInput = ref<VTextField | null>(null);
+    const initialDateInput = ref<VTextField | null>(null);
+    const endDateInput = ref<VTextField | null>(null);
 
     onMounted(async() => {
         items.value = await getAll({ worker_type: workerType.value });
@@ -493,7 +504,7 @@
       formRef.value?.reset();
       formLaboralRef.value?.reset();
       formData.value = new Worker();
-      isAddingExperience.value = false
+      isEditingExperienceList.value = false
       dialog.value = false;
       experience.value = new Experience();
     }
@@ -529,12 +540,14 @@
   }
 
   const onEditExp = (oldExp: Experience) => {
-    isAddingExperience.value = true
+    isEditingExperienceList.value = true
     experience.value = { ...oldExp };
     oldExperience.value = { ...oldExp };
   }
 
-  const onEditExpList = (newExp?: Experience, oldExp?: Experience) => {
+  const onEditExpList = async (newExp?: Experience, oldExp?: Experience) => {
+
+    if (isEditingExperienceList.value && !(await isExpValid())) return
 
     if (oldExperience.value) formData.value.experiences = formData.value.experiences.filter(exp => !shallowEqual(exp, oldExperience.value));
     if (oldExp) formData.value.experiences = formData.value.experiences.filter(exp => !shallowEqual(exp, oldExp));
@@ -545,8 +558,23 @@
     onCancelExp();
   }
 
+  const isExpValid = async(): Promise<boolean> => {
+    const expInputsList = [ companyInput, positionInput, wageInput, initialDateInput, endDateInput ];
+
+    let isExpValid = true
+
+    for(const input of expInputsList) {
+      let isValid = {...await input.value!.validate()};
+
+      if (Object.keys(isValid).length != 0) 
+        isExpValid = false;
+    }
+
+    return isExpValid;
+  }
+
   const onCancelExp = () => {
     experience.value = new Experience();
-    isAddingExperience.value = false;
+    isEditingExperienceList.value = false;
   }
 </script>

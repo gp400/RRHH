@@ -46,6 +46,9 @@
             hide-default-footer
         />
     </div>
+    <div class="mt-10" v-else>
+        <p class="text-center font-weight-bold">Ingrese el rango de fechas</p>
+    </div>
 </template>
 
 <script setup lang="ts">

@@ -9,6 +9,10 @@ export const numberRule = [
     }
 ]
 
+export const emailRule = [
+    (v: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v) || `El Correo no es valido.`
+]
+
 export const nonNegativeRule = [
     (v: number) => v >= 0 || `Este campo no puede ser negativo.`
 ]
