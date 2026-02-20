@@ -117,7 +117,7 @@
     </v-col>
   </v-row>
 
-  <v-dialog v-model="dialog" max-width="600" persistent>
+  <v-dialog v-model="dialog" max-width="700" persistent>
     <v-card>
       <v-card-title> Complete los campos </v-card-title>
 

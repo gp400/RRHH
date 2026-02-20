@@ -69,7 +69,7 @@
             :items="positionOptions"
             item-title="name"
             item-value="id"
-            label="Puesto al que aspira"
+            label="Puesto"
             :rules="requiredRule"
           />
         </v-col>

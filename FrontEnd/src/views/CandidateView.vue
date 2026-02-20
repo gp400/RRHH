@@ -328,6 +328,7 @@
     import { DataTableHeader } from 'vuetify';
     import { VForm, VTextField } from 'vuetify/components';
     import { shallowEqual } from '@/utils/shallowEqual';
+    import { useRouter } from 'vue-router';
 
     const { getAll: getAllPositions } = usePosition()
     const { getAll: getAllDepartments } = useDepartment()
@@ -341,6 +342,8 @@
         update
     } = useWorker()
 
+    const router = useRouter()
+
     const showExpand = true;
     const title = 'Candidatos';
     const btnText = 'Crear Candidato';
@@ -351,6 +354,7 @@
     const trainingIdFilter = ref<number | null>(null);
 
     const dialog = ref<boolean>(false);
+    const isOnHire = ref<boolean>(false);
     const formRef = ref<InstanceType<typeof VForm> | null>(null);
     const formLaboralRef = ref<InstanceType<typeof VForm> | null>(null);
     const formData = ref(new Worker());
@@ -471,6 +475,10 @@
             items.value = await getAll({ worker_type: workerType.value });
         }
 
+        if (isOnHire.value) router.push('/employee')
+
+        isOnHire.value = false;
+
         return valid
     };
 
@@ -493,11 +501,13 @@
         await onEdit(id);
         formData.value.type = WorkerType.employee;
         dialog.value=true;
+        isOnHire.value = true;
     }
 
     const onCancelHire = () => {
       dialog.value = false;
       formData.value = new Worker();
+      isOnHire.value = false;
     }
 
     const reset = () => {
